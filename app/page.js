@@ -1,54 +1,32 @@
-"use client"
+import Link from "next/link"
 
-import { useEffect, useState } from "react"
-
-export default function Quiz(){
-
-  const [question,setQuestion] = useState(null)
-
-  useEffect(()=>{
-
-    fetch("/api/questions")
-    .then(res=>res.json())
-    .then(data=>{
-      console.log(data)
-      setQuestion(data[0])
-    })
-
-  },[])
-
-
-  if(!question){
-    return <h1>题目加载中...</h1>
-  }
-
+export default function Home(){
 
   return (
+
     <main>
 
-      <h1>{question.title}</h1>
+      <h1>
+        在线题库系统
+      </h1>
 
-      <p>{question.content}</p>
+
+      <p>
+        欢迎来到我的刷题平台
+      </p>
 
 
-      <button>
-        A. {question.option_a}
-      </button>
+      <Link href="/quiz">
 
-      <button>
-        B. {question.option_b}
-      </button>
+        <button>
+          开始刷题
+        </button>
 
-      <button>
-        C. {question.option_c}
-      </button>
-
-      <button>
-        D. {question.option_d}
-      </button>
+      </Link>
 
 
     </main>
+
   )
 
 }
