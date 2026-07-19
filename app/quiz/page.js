@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react"
 
-
 export default function Quiz(){
 
   const [questions,setQuestions] = useState([])
   const [index,setIndex] = useState(0)
   const [loading,setLoading] = useState(true)
+
+  const [selected,setSelected] = useState("")
   const [result,setResult] = useState("")
 
 
@@ -16,14 +17,11 @@ export default function Quiz(){
     fetch("/questions")
       .then(res=>res.json())
       .then(data=>{
-
         setQuestions(data)
         setLoading(false)
-
       })
 
   },[])
-
 
 
   if(loading){
@@ -47,12 +45,18 @@ export default function Quiz(){
   }
 
 
-
   const q = questions[index]
 
 
+  function choose(option){
 
-  function checkAnswer(option){
+    if(selected){
+      return
+    }
+
+
+    setSelected(option)
+
 
     if(option === q.answer){
 
@@ -61,7 +65,7 @@ export default function Quiz(){
     }else{
 
       setResult(
-        "❌ 回答错误，正确答案：" + q.answer
+        "❌ 回答错误，正确答案是：" + q.answer
       )
 
     }
@@ -69,12 +73,13 @@ export default function Quiz(){
   }
 
 
-
-  function nextQuestion(){
-
-    setResult("")
+  function next(){
 
     setIndex(index + 1)
+
+    setSelected("")
+
+    setResult("")
 
   }
 
@@ -91,56 +96,89 @@ export default function Quiz(){
 
 
       <h2>
+
         第 {index + 1} 题
+
       </h2>
 
 
       <h3>
+
         {q.title}
+
       </h3>
 
 
       <p>
+
         {q.content}
+
       </p>
 
 
 
-      <button onClick={()=>checkAnswer("A")}>
+      <button
+        onClick={()=>choose("A")}
+        disabled={selected}
+      >
         A. {q.option_a}
       </button>
 
+
       <br/><br/>
 
 
-      <button onClick={()=>checkAnswer("B")}>
+      <button
+        onClick={()=>choose("B")}
+        disabled={selected}
+      >
         B. {q.option_b}
       </button>
 
+
       <br/><br/>
 
 
-      <button onClick={()=>checkAnswer("C")}>
+      <button
+        onClick={()=>choose("C")}
+        disabled={selected}
+      >
         C. {q.option_c}
       </button>
 
+
       <br/><br/>
 
 
-      <button onClick={()=>checkAnswer("D")}>
+      <button
+        onClick={()=>choose("D")}
+        disabled={selected}
+      >
         D. {q.option_d}
       </button>
 
 
 
       <h3>
+
         {result}
+
       </h3>
 
 
-      <button onClick={nextQuestion}>
-        下一题
-      </button>
+
+      {
+        selected && (
+
+          <button onClick={next}>
+
+            下一题
+
+          </button>
+
+        )
+      }
+
 
 
     </main>
