@@ -5,6 +5,7 @@ import { useEffect, useState } from "react"
 
 export default function Quiz(){
 
+
   const [questions,setQuestions] = useState([])
 
   const [index,setIndex] = useState(0)
@@ -19,17 +20,24 @@ export default function Quiz(){
 
   const [answered,setAnswered] = useState(false)
 
+  const [message,setMessage] = useState("")
+
 
 
   useEffect(()=>{
 
+
     fetch("/questions")
+
     .then(res=>res.json())
+
     .then(data=>{
+
 
       setQuestions(data)
 
       setLoading(false)
+
 
     })
 
@@ -38,37 +46,46 @@ export default function Quiz(){
 
 
 
+
   if(loading){
+
 
     return (
 
       <main>
 
         <h1>
-          开始刷题
+          在线题库
         </h1>
+
 
         <p>
           题目加载中...
         </p>
 
+
       </main>
 
     )
+
 
   }
 
 
 
+
   if(finished){
+
 
     return (
 
       <main>
 
+
         <h1>
           答题完成
         </h1>
+
 
 
         <p>
@@ -77,20 +94,33 @@ export default function Quiz(){
         </p>
 
 
+
         <p>
           答对：
           {score}
         </p>
 
 
+
+
         <p>
+
           正确率：
+
           {
+            questions.length===0
+            ?
+            0
+            :
             Math.round(
               score/questions.length*100
             )
-          }%
+          }
+
+          %
+
         </p>
+
 
 
 
@@ -99,16 +129,22 @@ export default function Quiz(){
         </h2>
 
 
+
         {
-          wrong.length===0 ?
+          wrong.length===0
+
+          ?
 
           <p>
-            太棒了，没有错题！
+            恭喜，没有错题！
           </p>
+
 
           :
 
+
           wrong.map(item=>(
+
 
             <div key={item.id}>
 
@@ -121,10 +157,19 @@ export default function Quiz(){
               </h3>
 
 
+
+              <p>
+                题目：
+                {item.content}
+              </p>
+
+
+
               <p>
                 正确答案：
                 {item.answer}
               </p>
+
 
 
               <p>
@@ -133,22 +178,51 @@ export default function Quiz(){
               </p>
 
 
+
             </div>
 
 
           ))
+
         }
+
 
 
       </main>
 
     )
 
+
   }
 
 
 
+
+
   const q = questions[index]
+
+
+
+  if(!q){
+
+
+    return (
+
+      <main>
+
+        <h1>
+          暂无题目
+        </h1>
+
+
+      </main>
+
+    )
+
+
+  }
+
+
 
 
 
@@ -162,17 +236,29 @@ export default function Quiz(){
     }
 
 
+
     setAnswered(true)
 
 
 
-    if(answer===q.answer){
+    if(
+      answer.trim() === q.answer.trim()
+    ){
 
 
-      setScore(score+1)
+      setScore(
+        score + 1
+      )
 
 
-    }else{
+      setMessage(
+        "✅ 回答正确"
+      )
+
+
+    }
+
+    else{
 
 
       setWrong([
@@ -181,7 +267,13 @@ export default function Quiz(){
       ])
 
 
+      setMessage(
+        "❌ 回答错误"
+      )
+
+
     }
+
 
 
   }
@@ -189,26 +281,37 @@ export default function Quiz(){
 
 
 
+
   function nextQuestion(){
 
+
+
+    setMessage("")
 
     setAnswered(false)
 
 
 
-    if(index+1 < questions.length){
+    if(
+      index + 1 < questions.length
+    ){
 
 
-      setIndex(index+1)
+      setIndex(
+        index + 1
+      )
 
 
-    }else{
+    }
+
+    else{
 
 
       setFinished(true)
 
 
     }
+
 
 
   }
@@ -254,7 +357,10 @@ export default function Quiz(){
       </button>
 
 
+
       <br/><br/>
+
+
 
 
       <button
@@ -264,7 +370,10 @@ export default function Quiz(){
       </button>
 
 
+
       <br/><br/>
+
+
 
 
       <button
@@ -274,7 +383,10 @@ export default function Quiz(){
       </button>
 
 
+
       <br/><br/>
+
+
 
 
       <button
@@ -289,37 +401,46 @@ export default function Quiz(){
       {
         answered &&
 
+        <>
+
+        <h3>
+          {message}
+        </h3>
+
+
         <p>
-
-          {
-            q.answer === undefined ?
-
-            ""
-
-            :
-
-            "答案：" + q.answer
-
-          }
-
+          正确答案：
+          {q.answer}
         </p>
 
+
+        </>
       }
 
 
 
 
-      <br/>
-
-
       {
         answered &&
+
 
         <button
         onClick={nextQuestion}
         >
 
-          下一题
+          {
+            index+1===questions.length
+
+            ?
+
+            "查看成绩"
+
+            :
+
+            "下一题"
+
+          }
+
 
         </button>
 
