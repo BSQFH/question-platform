@@ -10,17 +10,15 @@ export default function Quiz(){
 
   const [index,setIndex] = useState(0)
 
-  const [loading,setLoading] = useState(true)
-
   const [score,setScore] = useState(0)
-
-  const [finished,setFinished] = useState(false)
 
   const [wrong,setWrong] = useState([])
 
-  const [answered,setAnswered] = useState(false)
+  const [loading,setLoading] = useState(true)
 
-  const [message,setMessage] = useState("")
+  const [finished,setFinished] = useState(false)
+
+  const [saved,setSaved] = useState(false)
 
 
 
@@ -29,17 +27,15 @@ export default function Quiz(){
 
     fetch("/questions")
 
-    .then(res=>res.json())
+      .then(res=>res.json())
 
-    .then(data=>{
+      .then(data=>{
 
+        setQuestions(data)
 
-      setQuestions(data)
+        setLoading(false)
 
-      setLoading(false)
-
-
-    })
+      })
 
 
   },[])
@@ -47,29 +43,162 @@ export default function Quiz(){
 
 
 
-  if(loading){
+
+  useEffect(()=>{
 
 
-    return (
-
-      <main>
-
-        <h1>
-          在线题库
-        </h1>
+    if(finished && !saved){
 
 
-        <p>
-          题目加载中...
-        </p>
+      saveRecord()
 
 
-      </main>
+    }
 
+
+  },[finished])
+
+
+
+
+
+
+
+  async function saveRecord(){
+
+
+    const total = questions.length
+
+
+    const accuracy = Math.round(
+      score / total * 100
     )
 
 
+
+    await fetch("/records",{
+
+      method:"POST",
+
+      headers:{
+
+        "Content-Type":"application/json"
+
+      },
+
+
+      body:JSON.stringify({
+
+        username:"游客",
+
+        total:total,
+
+        correct:score,
+
+        accuracy:accuracy,
+
+        wrong_questions:wrong
+
+      })
+
+
+    })
+
+
+    setSaved(true)
+
+
   }
+
+
+
+
+
+
+
+  function answer(choice){
+
+
+    const q = questions[index]
+
+
+    if(choice === q.answer){
+
+
+      setScore(score+1)
+
+
+    }else{
+
+
+      setWrong([
+
+        ...wrong,
+
+        {
+
+          title:q.title,
+
+          content:q.content,
+
+          answer:q.answer,
+
+          analysis:q.analysis
+
+        }
+
+      ])
+
+
+    }
+
+
+
+    next()
+
+  }
+
+
+
+
+
+
+
+  function next(){
+
+
+    if(index + 1 >= questions.length){
+
+
+      setFinished(true)
+
+
+    }else{
+
+
+      setIndex(index+1)
+
+
+    }
+
+
+  }
+
+
+
+
+
+
+  if(loading){
+
+
+    return <h1>题目加载中...</h1>
+
+
+  }
+
+
+
 
 
 
@@ -89,36 +218,20 @@ export default function Quiz(){
 
 
         <p>
-          总题数：
-          {questions.length}
+          总题数：{questions.length}
         </p>
 
 
 
         <p>
-          答对：
-          {score}
+          答对：{score}
         </p>
 
 
 
-
         <p>
-
           正确率：
-
-          {
-            questions.length===0
-            ?
-            0
-            :
-            Math.round(
-              score/questions.length*100
-            )
-          }
-
-          %
-
+          {Math.round(score/questions.length*100)}%
         </p>
 
 
@@ -131,22 +244,10 @@ export default function Quiz(){
 
 
         {
-          wrong.length===0
-
-          ?
-
-          <p>
-            恭喜，没有错题！
-          </p>
+          wrong.map((item,i)=>(
 
 
-          :
-
-
-          wrong.map(item=>(
-
-
-            <div key={item.id}>
+            <div key={i}>
 
 
               <hr/>
@@ -157,24 +258,18 @@ export default function Quiz(){
               </h3>
 
 
-
               <p>
-                题目：
-                {item.content}
+                题目：{item.content}
               </p>
 
 
-
               <p>
-                正确答案：
-                {item.answer}
+                正确答案：{item.answer}
               </p>
 
 
-
               <p>
-                解析：
-                {item.analysis}
+                解析：{item.analysis}
               </p>
 
 
@@ -183,139 +278,22 @@ export default function Quiz(){
 
 
           ))
-
         }
-
 
 
       </main>
 
+
     )
 
-
   }
+
 
 
 
 
 
   const q = questions[index]
-
-
-
-  if(!q){
-
-
-    return (
-
-      <main>
-
-        <h1>
-          暂无题目
-        </h1>
-
-
-      </main>
-
-    )
-
-
-  }
-
-
-
-
-
-  function checkAnswer(answer){
-
-
-    if(answered){
-
-      return
-
-    }
-
-
-
-    setAnswered(true)
-
-
-
-    if(
-      answer.trim() === q.answer.trim()
-    ){
-
-
-      setScore(
-        score + 1
-      )
-
-
-      setMessage(
-        "✅ 回答正确"
-      )
-
-
-    }
-
-    else{
-
-
-      setWrong([
-        ...wrong,
-        q
-      ])
-
-
-      setMessage(
-        "❌ 回答错误"
-      )
-
-
-    }
-
-
-
-  }
-
-
-
-
-
-  function nextQuestion(){
-
-
-
-    setMessage("")
-
-    setAnswered(false)
-
-
-
-    if(
-      index + 1 < questions.length
-    ){
-
-
-      setIndex(
-        index + 1
-      )
-
-
-    }
-
-    else{
-
-
-      setFinished(true)
-
-
-    }
-
-
-
-  }
-
 
 
 
@@ -349,108 +327,46 @@ export default function Quiz(){
 
 
 
+      <button onClick={()=>answer("A")}>
 
-      <button
-      onClick={()=>checkAnswer("A")}
-      >
         A. {q.option_a}
-      </button>
 
+      </button>
 
 
       <br/><br/>
 
 
+      <button onClick={()=>answer("B")}>
 
-
-      <button
-      onClick={()=>checkAnswer("B")}
-      >
         B. {q.option_b}
-      </button>
 
+      </button>
 
 
       <br/><br/>
 
 
+      <button onClick={()=>answer("C")}>
 
-
-      <button
-      onClick={()=>checkAnswer("C")}
-      >
         C. {q.option_c}
-      </button>
 
+      </button>
 
 
       <br/><br/>
 
 
+      <button onClick={()=>answer("D")}>
 
-
-      <button
-      onClick={()=>checkAnswer("D")}
-      >
         D. {q.option_d}
+
       </button>
-
-
-
-
-      {
-        answered &&
-
-        <>
-
-        <h3>
-          {message}
-        </h3>
-
-
-        <p>
-          正确答案：
-          {q.answer}
-        </p>
-
-
-        </>
-      }
-
-
-
-
-      {
-        answered &&
-
-
-        <button
-        onClick={nextQuestion}
-        >
-
-          {
-            index+1===questions.length
-
-            ?
-
-            "查看成绩"
-
-            :
-
-            "下一题"
-
-          }
-
-
-        </button>
-
-      }
 
 
 
     </main>
 
   )
-
 
 }
