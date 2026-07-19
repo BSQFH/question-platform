@@ -7,7 +7,9 @@ export default function Quiz(){
   const [questions,setQuestions] = useState([])
   const [index,setIndex] = useState(0)
   const [loading,setLoading] = useState(true)
-
+const [score,setScore] = useState(0)
+const [finished,setFinished] = useState(false)
+const [wrong,setWrong] = useState([])
   const [selected,setSelected] = useState("")
   const [result,setResult] = useState("")
 
