@@ -15,8 +15,7 @@ export default function Records(){
   useEffect(()=>{
 
 
-    fetch("/records")
-
+    fetch("/api/records")
     .then(res=>res.json())
 
     .then(data=>{
