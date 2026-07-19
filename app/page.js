@@ -1,5 +1,3 @@
-import Link from "next/link"
-
 export default function Home(){
 
   return (
@@ -11,18 +9,55 @@ export default function Home(){
       </h1>
 
 
-      <p>
-        欢迎来到我的刷题平台
-      </p>
+      <hr/>
 
 
-      <Link href="/quiz">
+      <h2>
+        功能菜单
+      </h2>
 
-        <button>
-          开始刷题
-        </button>
 
-      </Link>
+
+      <div>
+
+
+        <a href="/quiz">
+
+          <button>
+            开始答题
+          </button>
+
+        </a>
+
+
+        <br/>
+        <br/>
+
+
+        <a href="/records">
+
+          <button>
+            我的成绩
+          </button>
+
+        </a>
+
+
+        <br/>
+        <br/>
+
+
+        <a href="/wrong">
+
+          <button>
+            错题本
+          </button>
+
+        </a>
+
+
+
+      </div>
 
 
     </main>
