@@ -6,367 +6,372 @@ import { useEffect, useState } from "react"
 export default function Quiz(){
 
 
-  const [questions,setQuestions] = useState([])
+const [questions,setQuestions]=useState([])
 
-  const [index,setIndex] = useState(0)
+const [index,setIndex]=useState(0)
 
-  const [score,setScore] = useState(0)
+const [score,setScore]=useState(0)
 
-  const [wrong,setWrong] = useState([])
+const [wrong,setWrong]=useState([])
 
-  const [loading,setLoading] = useState(true)
+const [loading,setLoading]=useState(true)
 
-  const [finished,setFinished] = useState(false)
+const [finished,setFinished]=useState(false)
 
-  const [saved,setSaved] = useState(false)
+const [saved,setSaved]=useState(false)
 
 
 
-  useEffect(()=>{
+useEffect(()=>{
 
+fetch("/questions")
 
-    fetch("/questions")
+.then(res=>res.json())
 
-      .then(res=>res.json())
+.then(data=>{
 
-      .then(data=>{
+setQuestions(data)
 
-        setQuestions(data)
+setLoading(false)
 
-        setLoading(false)
+})
 
-      })
 
+},[])
 
-  },[])
 
 
 
 
+async function saveRecord(finalScore,finalWrong){
 
-  useEffect(()=>{
 
+if(saved) return
 
-    if(finished && !saved){
 
 
-      saveRecord()
+const total=questions.length
 
 
-    }
+const accuracy=Math.round(
+finalScore / total *100
+)
 
 
-  },[finished])
 
+const res=await fetch("/records",{
 
 
+method:"POST",
 
 
+headers:{
 
+"Content-Type":"application/json"
 
-  async function saveRecord(){
+},
 
 
-    const total = questions.length
+body:JSON.stringify({
 
+username:"游客",
 
-    const accuracy = Math.round(
-      score / total * 100
-    )
+total:total,
 
+correct:finalScore,
 
+accuracy:accuracy,
 
-    await fetch("/records",{
+wrong_questions:finalWrong
 
-      method:"POST",
+})
 
-      headers:{
 
-        "Content-Type":"application/json"
+})
 
-      },
 
 
-      body:JSON.stringify({
+if(res.ok){
 
-        username:"游客",
+setSaved(true)
 
-        total:total,
+}
 
-        correct:score,
 
-        accuracy:accuracy,
 
-        wrong_questions:wrong
+}
 
-      })
 
 
-    })
 
 
-    setSaved(true)
 
 
-  }
+function answer(choice){
 
 
+const q=questions[index]
 
 
+let newScore=score
 
+let newWrong=[...wrong]
 
 
-  function answer(choice){
 
+if(choice===q.answer){
 
-    const q = questions[index]
 
+newScore=score+1
 
-    if(choice === q.answer){
 
+setScore(newScore)
 
-      setScore(score+1)
 
+}else{
 
-    }else{
 
+newWrong=[
 
-      setWrong([
+...wrong,
 
-        ...wrong,
+{
 
-        {
+title:q.title,
 
-          title:q.title,
+content:q.content,
 
-          content:q.content,
+answer:q.answer,
 
-          answer:q.answer,
+analysis:q.analysis
 
-          analysis:q.analysis
+}
 
-        }
+]
 
-      ])
 
+setWrong(newWrong)
 
-    }
 
+}
 
 
-    next()
 
-  }
 
 
+if(index+1>=questions.length){
 
 
+setFinished(true)
 
 
+saveRecord(
+newScore,
+newWrong
+)
 
-  function next(){
 
+}else{
 
-    if(index + 1 >= questions.length){
 
+setIndex(index+1)
 
-      setFinished(true)
 
+}
 
-    }else{
 
 
-      setIndex(index+1)
+}
 
 
-    }
 
 
-  }
 
 
 
 
+if(loading){
 
 
-  if(loading){
+return <h1>题目加载中...</h1>
 
 
-    return <h1>题目加载中...</h1>
+}
 
 
-  }
 
 
 
+if(finished){
 
 
+return (
 
+<main>
 
-  if(finished){
 
+<h1>
+答题完成
+</h1>
 
-    return (
 
-      <main>
+<p>
+总题数：{questions.length}
+</p>
 
 
-        <h1>
-          答题完成
-        </h1>
 
+<p>
+答对：{score}
+</p>
 
 
-        <p>
-          总题数：{questions.length}
-        </p>
 
+<p>
+正确率：
+{Math.round(score/questions.length*100)}%
+</p>
 
 
-        <p>
-          答对：{score}
-        </p>
+{
+saved &&
 
+<p>
+✅ 答题记录已保存
+</p>
 
+}
 
-        <p>
-          正确率：
-          {Math.round(score/questions.length*100)}%
-        </p>
 
 
+<h2>
+错题回顾
+</h2>
 
 
-        <h2>
-          错题回顾
-        </h2>
 
+{
 
+wrong.map((item,i)=>(
 
-        {
-          wrong.map((item,i)=>(
 
+<div key={i}>
 
-            <div key={i}>
 
+<hr/>
 
-              <hr/>
 
+<h3>
+{item.title}
+</h3>
 
-              <h3>
-                {item.title}
-              </h3>
 
+<p>
+题目：{item.content}
+</p>
 
-              <p>
-                题目：{item.content}
-              </p>
 
+<p>
+正确答案：{item.answer}
+</p>
 
-              <p>
-                正确答案：{item.answer}
-              </p>
 
+<p>
+解析：{item.analysis}
+</p>
 
-              <p>
-                解析：{item.analysis}
-              </p>
 
+</div>
 
 
-            </div>
+))
 
+}
 
-          ))
-        }
 
 
-      </main>
+</main>
 
+)
 
-    )
+}
 
-  }
 
 
 
 
+const q=questions[index]
 
 
-  const q = questions[index]
 
+return (
 
+<main>
 
 
-  return (
+<h1>
+在线题库
+</h1>
 
-    <main>
 
 
-      <h1>
-        在线题库
-      </h1>
+<h2>
+第 {index+1} 题
+</h2>
 
 
+<h3>
+{q.title}
+</h3>
 
-      <h2>
-        第 {index+1} 题
-      </h2>
 
+<p>
+{q.content}
+</p>
 
 
-      <h3>
-        {q.title}
-      </h3>
 
+<button onClick={()=>answer("A")}>
 
+A. {q.option_a}
 
-      <p>
-        {q.content}
-      </p>
+</button>
 
 
+<br/><br/>
 
-      <button onClick={()=>answer("A")}>
 
-        A. {q.option_a}
+<button onClick={()=>answer("B")}>
 
-      </button>
+B. {q.option_b}
 
+</button>
 
-      <br/><br/>
 
+<br/><br/>
 
-      <button onClick={()=>answer("B")}>
 
-        B. {q.option_b}
+<button onClick={()=>answer("C")}>
 
-      </button>
+C. {q.option_c}
 
+</button>
 
-      <br/><br/>
 
+<br/><br/>
 
-      <button onClick={()=>answer("C")}>
 
-        C. {q.option_c}
+<button onClick={()=>answer("D")}>
 
-      </button>
+D. {q.option_d}
 
+</button>
 
-      <br/><br/>
 
 
-      <button onClick={()=>answer("D")}>
+</main>
 
-        D. {q.option_d}
+)
 
-      </button>
-
-
-
-    </main>
-
-  )
 
 }
