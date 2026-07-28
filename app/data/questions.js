@@ -1,0 +1,215 @@
+import { legacyQuestions } from "./generated/legacy-questions.js"
+import { metroQuestions } from "./generated/metro-questions.js"
+
+const curatedQuestions = [
+  {
+    id: "electrical-001",
+    title: "欧姆定律",
+    content: "在电阻值保持不变时，导体中的电流与导体两端的电压是什么关系？",
+    option_a: "成正比",
+    option_b: "成反比",
+    option_c: "没有关系",
+    option_d: "先增大后减小",
+    answer: "A",
+    analysis: "欧姆定律 I=U/R。电阻 R 不变时，电压 U 增大，电流 I 按相同比例增大。",
+    category: "电气基础",
+    difficulty: "基础"
+  },
+  {
+    id: "electrical-002",
+    title: "电阻单位",
+    content: "电阻的国际单位是下列哪一项？",
+    option_a: "伏特",
+    option_b: "安培",
+    option_c: "欧姆",
+    option_d: "瓦特",
+    answer: "C",
+    analysis: "电阻的国际单位是欧姆，符号为 Ω；伏特、安培和瓦特分别是电压、电流和功率的单位。",
+    category: "电气基础",
+    difficulty: "基础"
+  },
+  {
+    id: "electrical-003",
+    title: "并联电路",
+    content: "在理想并联电路中，各支路两端的哪一个电气量相等？",
+    option_a: "电流",
+    option_b: "电压",
+    option_c: "电阻",
+    option_d: "功率",
+    answer: "B",
+    analysis: "并联支路连接在同一对节点之间，因此各支路两端电压相等；总电流等于各支路电流之和。",
+    category: "电气基础",
+    difficulty: "基础"
+  },
+  {
+    id: "electrical-004",
+    title: "万用表测量",
+    content: "使用万用表测量某元件两端电压时，表笔应如何接入电路？",
+    option_a: "与元件串联",
+    option_b: "与元件并联",
+    option_c: "短接电源",
+    option_d: "只连接一支表笔",
+    answer: "B",
+    analysis: "测量电压时，电压表或万用表电压挡应并联在被测元件两端；测量电流时才需要串联接入。",
+    category: "电气基础",
+    difficulty: "基础"
+  },
+  {
+    id: "safety-001",
+    title: "上锁挂牌",
+    content: "检修作业实施上锁挂牌（LOTO）的主要目的是什么？",
+    option_a: "缩短检修时间",
+    option_b: "防止能源意外释放或设备误启动",
+    option_c: "记录工具数量",
+    option_d: "提高设备运行速度",
+    answer: "B",
+    analysis: "上锁挂牌通过隔离并锁定危险能源，防止检修期间设备被误送电、误启动或残余能源突然释放。",
+    category: "作业安全",
+    difficulty: "基础"
+  },
+  {
+    id: "safety-002",
+    title: "电气火灾处置",
+    content: "发现带电设备起火时，首先应在确保人身安全的前提下采取什么措施？",
+    option_a: "立即用水扑救",
+    option_b: "切断电源并使用适用的灭火器材",
+    option_c: "继续运行设备",
+    option_d: "用金属物覆盖",
+    answer: "B",
+    analysis: "应优先切断电源，并选用适用于电气火灾的灭火器材。未确认断电前不能直接用水扑救，以免触电。",
+    category: "作业安全",
+    difficulty: "基础"
+  },
+  {
+    id: "safety-003",
+    title: "保护接地",
+    content: "电气设备采用保护接地的主要作用是什么？",
+    option_a: "增大设备功率",
+    option_b: "降低故障时外露导电部分的触电风险",
+    option_c: "提高电源频率",
+    option_d: "减少设备重量",
+    answer: "B",
+    analysis: "保护接地为故障电流提供低阻抗通路，配合保护装置快速切断故障，从而降低外壳带电造成的触电风险。",
+    category: "作业安全",
+    difficulty: "进阶"
+  },
+  {
+    id: "mechanical-001",
+    title: "扭矩扳手",
+    content: "按照工艺要求紧固关键螺栓时，使用扭矩扳手的主要目的是什么？",
+    option_a: "使所有螺栓外观一致",
+    option_b: "保证紧固力矩达到规定值",
+    option_c: "减少螺栓数量",
+    option_d: "改变螺纹规格",
+    answer: "B",
+    analysis: "关键连接需要按规定力矩紧固。力矩过小可能松动，过大可能造成螺栓拉伸、螺纹损伤或连接件变形。",
+    category: "机械基础",
+    difficulty: "基础"
+  },
+  {
+    id: "mechanical-002",
+    title: "量具使用",
+    content: "使用游标卡尺测量前，首先应重点检查什么？",
+    option_a: "量具颜色",
+    option_b: "零位和测量面是否清洁完好",
+    option_c: "包装盒尺寸",
+    option_d: "工件重量",
+    answer: "B",
+    analysis: "测量前应清洁测量面、合拢量爪检查零位，并确认量具在检定有效期内，以减少系统误差。",
+    category: "机械基础",
+    difficulty: "基础"
+  },
+  {
+    id: "maintenance-001",
+    title: "轴承异常",
+    content: "设备运行中发现轴承温度持续异常升高并伴有异响，正确的处理原则是什么？",
+    option_a: "继续运行直到计划检修",
+    option_b: "降低警报音量",
+    option_c: "按规程停机并检查润滑、间隙和损伤情况",
+    option_d: "向轴承表面浇水降温",
+    answer: "C",
+    analysis: "持续温升和异响可能与润滑不良、装配异常或轴承损伤有关，应按规程停机隔离并查明原因，不能只处理表面现象。",
+    category: "检修基础",
+    difficulty: "进阶"
+  },
+  {
+    id: "maintenance-002",
+    title: "预防性检修",
+    content: "预防性检修的核心目标是什么？",
+    option_a: "设备故障后再集中维修",
+    option_b: "在故障发生前发现并处理劣化趋势",
+    option_c: "取消日常检查",
+    option_d: "只更换外观件",
+    answer: "B",
+    analysis: "预防性检修依据周期、状态和劣化规律提前检查维护，目的是降低突发故障概率并保持设备可靠性。",
+    category: "检修基础",
+    difficulty: "基础"
+  },
+  {
+    id: "maintenance-003",
+    title: "检修记录",
+    content: "完成设备检修后，规范填写检修记录最重要的作用是什么？",
+    option_a: "增加纸张使用量",
+    option_b: "形成可追溯的作业和设备状态依据",
+    option_c: "替代现场检查",
+    option_d: "延长作业时间",
+    answer: "B",
+    analysis: "完整记录应反映检查项目、测量数据、处理措施和人员时间，为质量追溯、趋势分析和后续检修提供依据。",
+    category: "检修基础",
+    difficulty: "基础"
+  },
+  {
+    id: "electrical-005",
+    title: "串联电路",
+    content: "在理想串联电路中，流经各元件的电流相等。",
+    option_a: "正确",
+    option_b: "错误",
+    answer: "A",
+    analysis: "串联电路只有一条电流路径，因此流经各串联元件的电流相等。",
+    category: "电气基础",
+    difficulty: "基础",
+    type: "判断题"
+  },
+  {
+    id: "safety-004",
+    title: "带电灭火",
+    content: "带电设备起火且尚未断电时，可以直接用水扑救。",
+    option_a: "正确",
+    option_b: "错误",
+    answer: "B",
+    analysis: "未确认断电前直接用水扑救可能导致触电，应先保证人身安全、切断电源并使用适用灭火器材。",
+    category: "作业安全",
+    difficulty: "基础",
+    type: "判断题"
+  },
+  {
+    id: "maintenance-004",
+    title: "状态检修",
+    content: "状态检修可以依据温度、振动等趋势数据安排维护，而不只依赖固定周期。",
+    option_a: "正确",
+    option_b: "错误",
+    answer: "A",
+    analysis: "状态检修通过监测设备状态和劣化趋势，在风险增大前安排针对性维护。",
+    category: "检修基础",
+    difficulty: "进阶",
+    type: "判断题"
+  },
+  {
+    id: "mechanical-003",
+    title: "量具零位",
+    content: "游标卡尺存在明显零位偏差时，仍可忽略偏差直接读取测量结果。",
+    option_a: "正确",
+    option_b: "错误",
+    answer: "B",
+    analysis: "零位偏差会形成系统误差，应先校正、记录并按规程处理，不能直接忽略。",
+    category: "机械基础",
+    difficulty: "进阶",
+    type: "判断题"
+  }
+]
+
+export const fallbackQuestions = [
+  ...curatedQuestions,
+  ...legacyQuestions,
+  ...metroQuestions
+]

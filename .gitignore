@@ -1,0 +1,12 @@
+node_modules/
+.next/
+out/
+.env*
+!.env.example
+!.env.*.example
+npm-debug.log*
+pnpm-debug.log*
+dev-server.*.log
+__pycache__/
+*.pyc
+NEXT_SESSION_HANDOFF.md
