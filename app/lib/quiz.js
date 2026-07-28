@@ -143,15 +143,36 @@ export function normalizeQuestions(input, options = {}) {
     .filter((question) => includeNeedsReview || question.importStatus !== "needs_review")
 }
 
+function normalizeSearchText(value) {
+  return String(value ?? "")
+    .normalize("NFKC")
+    .toLocaleLowerCase("zh-CN")
+}
+
+export function matchesQuestionSearch(question, query) {
+  const terms = normalizeSearchText(query).split(/\s+/).filter(Boolean)
+  if (!terms.length) return true
+
+  const searchableText = normalizeSearchText([
+    question?.title,
+    question?.content,
+    ...Object.values(question?.options ?? {})
+  ].join(" "))
+
+  return terms.every((term) => searchableText.includes(term))
+}
+
 export function filterQuestions(input, filters = {}) {
   const category = String(filters.category ?? "all")
   const difficulty = String(filters.difficulty ?? "all")
   const type = String(filters.type ?? "all")
+  const query = String(filters.query ?? "")
 
   return normalizeQuestions(input).filter((question) => (
     (category === "all" || question.category === category) &&
     (difficulty === "all" || question.difficulty === difficulty) &&
-    (type === "all" || question.type === type)
+    (type === "all" || question.type === type) &&
+    matchesQuestionSearch(question, query)
   ))
 }
 
@@ -231,6 +252,7 @@ export function buildRecord({
     settings: {
       category: String(settings.category ?? "all"),
       difficulty: String(settings.difficulty ?? "all"),
+      query: String(settings.query ?? "").slice(0, 120),
       type: String(settings.type ?? "all"),
       shuffled: settings.shuffled !== false
     },

@@ -14,12 +14,12 @@ import {
   isChoiceQuestion,
   isMultipleChoiceQuestion,
   normalizeQuestion,
-  normalizeQuestions,
   normalizeResponse,
   questionFingerprint,
   requiresManualGrading,
   shuffleItems
 } from "../lib/quiz"
+import { loadQuestionBank } from "../lib/questionClient"
 import {
   getLocalRecords,
   getMasteredQuestionIds,
@@ -47,6 +47,7 @@ function QuizContent() {
   const category = searchParams.get("category") || "all"
   const difficulty = searchParams.get("difficulty") || "all"
   const questionType = searchParams.get("type") || "all"
+  const questionQuery = (searchParams.get("q") || "").slice(0, 120)
   const minutes = Math.max(0, Math.min(180, Number.parseInt(searchParams.get("minutes"), 10) || 0))
   const timeLimitSeconds = sessionType === "exam" ? minutes * 60 : 0
 
@@ -89,21 +90,15 @@ function QuizContent() {
   }, [submitWarning])
 
   useEffect(() => {
-    const controller = new AbortController()
+    let active = true
 
     async function loadQuestions() {
       setStatus("loading")
       setError("")
 
       try {
-        const response = await fetch("/questions", {
-          cache: "no-store",
-          signal: controller.signal
-        })
-        if (!response.ok) throw new Error("题库读取失败")
-
-        const payload = await response.json()
-        let available = normalizeQuestions(payload)
+        let available = await loadQuestionBank({ refresh: reloadToken > 0 })
+        if (!active) return
 
         if (sourceMode === "wrong") {
           const wrongItems = collectWrongQuestions(
@@ -128,7 +123,8 @@ function QuizContent() {
         available = filterQuestions(available, {
           category,
           difficulty,
-          type: questionType
+          type: questionType,
+          query: questionQuery
         })
         if (shouldShuffle) available = shuffleItems(available)
 
@@ -151,18 +147,21 @@ function QuizContent() {
         startedAt.current = new Date().toISOString()
         setStatus(available.length ? "ready" : "empty")
       } catch (loadError) {
-        if (loadError.name === "AbortError") return
+        if (!active) return
         setError("暂时无法读取题库，请重试。")
         setStatus("error")
       }
     }
 
     loadQuestions()
-    return () => controller.abort()
+    return () => {
+      active = false
+    }
   }, [
     category,
     countParam,
     difficulty,
+    questionQuery,
     questionType,
     reloadToken,
     shouldShuffle,
@@ -326,6 +325,7 @@ function QuizContent() {
       settings: {
         category,
         difficulty,
+        query: questionQuery,
         type: questionType,
         shuffled: shouldShuffle
       }

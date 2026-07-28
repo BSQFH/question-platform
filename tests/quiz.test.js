@@ -8,6 +8,7 @@ import {
   filterQuestions,
   formatAnswer,
   formatDuration,
+  matchesQuestionSearch,
   normalizeQuestion,
   normalizeQuestions,
   normalizeRecord,
@@ -129,6 +130,61 @@ test("filters questions by category, difficulty and type", () => {
   )
 })
 
+test("searches question titles, content and options with normalized terms", () => {
+  const items = [
+    {
+      ...question,
+      id: "search-a",
+      title: "ALPHA 巡检",
+      content: "列车出库前应检查哪些项目？",
+      option_a: "车门状态",
+      option_b: "受电弓状态",
+      analysis: "仅供内部复核",
+      category: "车辆",
+      difficulty: "基础"
+    },
+    {
+      ...question,
+      id: "search-b",
+      title: "安全作业",
+      content: "进入轨行区前需要确认什么？",
+      option_a: "施工令",
+      option_b: "照明状态",
+      category: "安全",
+      difficulty: "进阶"
+    }
+  ]
+
+  assert.deepEqual(filterQuestions(items, { query: "列车 出库" }).map((item) => item.id), ["search-a"])
+  assert.deepEqual(filterQuestions(items, { query: "ＡＬＰＨＡ" }).map((item) => item.id), ["search-a"])
+  assert.deepEqual(filterQuestions(items, { query: "受电弓" }).map((item) => item.id), ["search-a"])
+  assert.deepEqual(
+    filterQuestions(items, { query: "轨行区", category: "安全", difficulty: "进阶", type: "单选题" }).map((item) => item.id),
+    ["search-b"]
+  )
+})
+
+test("question search excludes answers and analysis", () => {
+  const normalized = normalizeQuestion({
+    ...question,
+    option_a: "车门状态",
+    option_b: "受电弓状态",
+    analysis: "绝密解析词"
+  })
+
+  assert.equal(matchesQuestionSearch(normalized, "受电弓"), true)
+  assert.equal(matchesQuestionSearch(normalized, "绝密解析词"), false)
+  assert.equal(matchesQuestionSearch(normalized, ""), true)
+
+  const textQuestion = normalizeQuestion({
+    content: "填写设备名称",
+    answer: "答案独有关键词",
+    analysis: "普通解析",
+    type: "填空题"
+  })
+  assert.equal(matchesQuestionSearch(textQuestion, "答案独有关键词"), false)
+})
+
 test("the built-in bank contains valid single-choice and judgment questions", () => {
   const normalized = fallbackQuestions.map(normalizeQuestion).filter(Boolean)
   const available = normalizeQuestions(fallbackQuestions)
@@ -178,11 +234,12 @@ test("stores exam metadata and formats elapsed time", () => {
     answers: [{ question: normalized, selectedAnswer: "B", isCorrect: true }],
     sessionType: "exam",
     durationSeconds: 125,
-    settings: { type: "单选题", shuffled: false }
+    settings: { query: "列车", type: "单选题", shuffled: false }
   })
 
   assert.equal(record.mode, "exam")
   assert.equal(record.duration_seconds, 125)
+  assert.equal(record.settings.query, "列车")
   assert.equal(record.settings.shuffled, false)
   assert.equal(formatDuration(125), "02:05")
 })

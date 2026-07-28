@@ -3,8 +3,8 @@ import AppHeader from "./components/AppHeader"
 
 export const metadata = {
   title: {
-    default: "锡铁刷题",
-    template: "%s | 锡铁刷题"
+    default: "我爱我家",
+    template: "%s | 我爱我家"
   },
   description: "轨道交通岗位知识在线练习平台"
 }

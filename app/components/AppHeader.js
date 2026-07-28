@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 
 const navItems = [
   { href: "/", label: "首页" },
+  { href: "/search", label: "搜题" },
   { href: "/quiz", label: "答题" },
   { href: "/records", label: "成绩" },
   { href: "/wrong", label: "错题" }
@@ -18,9 +19,9 @@ export default function AppHeader() {
     <>
       <header className="app-header">
         <div className="header-inner">
-          <Link className="brand" href="/" aria-label="锡铁刷题首页">
-            <span className="brand-mark" aria-hidden="true">锡</span>
-            <span>锡铁刷题</span>
+          <Link className="brand" href="/" aria-label="我爱我家首页">
+            <span className="brand-mark" aria-hidden="true">家</span>
+            <span>我爱我家</span>
           </Link>
           <nav className="desktop-nav" aria-label="主导航">
             {navItems.map((item) => {

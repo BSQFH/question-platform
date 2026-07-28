@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
-import { collectWrongQuestions, formatAnswer } from "../lib/quiz"
+import { collectWrongQuestions, formatAnswer, matchesQuestionSearch } from "../lib/quiz"
 import {
   getLocalRecords,
   getMasteredQuestionIds,
@@ -43,10 +43,9 @@ export default function WrongBook() {
     [allWrongQuestions]
   )
   const visibleQuestions = useMemo(() => {
-    const keyword = search.trim().toLocaleLowerCase("zh-CN")
     return sourceQuestions.filter((item) => (
       (category === "all" || item.category === category) &&
-      (!keyword || `${item.title} ${item.content}`.toLocaleLowerCase("zh-CN").includes(keyword))
+      matchesQuestionSearch(item, search)
     ))
   }, [category, search, sourceQuestions])
 

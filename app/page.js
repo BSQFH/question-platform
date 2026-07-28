@@ -7,11 +7,11 @@ import {
   collectWrongQuestions,
   filterQuestions,
   normalizeQuestion,
-  normalizeQuestions,
   questionFingerprint,
   requiresManualGrading,
   summarizeRecords
 } from "./lib/quiz"
+import { loadQuestionBank } from "./lib/questionClient"
 import { getLocalRecords, getMasteredQuestionIds } from "./lib/storage"
 
 const emptyStats = {
@@ -46,17 +46,27 @@ export default function Home() {
   const [config, setConfig] = useState(initialConfig)
 
   useEffect(() => {
+    let active = true
     const records = getLocalRecords()
     const pendingWrong = collectWrongQuestions(records, getMasteredQuestionIds())
     const summary = summarizeRecords(records)
     setStats({ ...summary, wrongCount: pendingWrong.length })
     setWrongQuestions(pendingWrong)
 
-    fetch("/questions", { cache: "no-store" })
-      .then((response) => response.ok ? response.json() : [])
-      .then((data) => setQuestions(normalizeQuestions(data)))
-      .catch(() => setQuestions([]))
-      .finally(() => setLoaded(true))
+    loadQuestionBank()
+      .then((data) => {
+        if (active) setQuestions(data)
+      })
+      .catch(() => {
+        if (active) setQuestions([])
+      })
+      .finally(() => {
+        if (active) setLoaded(true)
+      })
+
+    return () => {
+      active = false
+    }
   }, [])
 
   const questionPool = useMemo(() => {
@@ -320,6 +330,9 @@ export default function Home() {
         <section className="panel quick-panel" aria-labelledby="quick-title">
           <div className="section-header"><h2 id="quick-title">快捷入口</h2></div>
           <div className="quick-list">
+            <Link href="/search">
+              <span><strong>搜索题库</strong><small>按关键词查找题目</small></span><span aria-hidden="true">→</span>
+            </Link>
             <Link href="/quiz?session=practice&mode=normal&count=10&shuffle=1&category=all&difficulty=all&type=all">
               <span><strong>10 题速练</strong><small>随机抽题，即答即看</small></span><span aria-hidden="true">→</span>
             </Link>
