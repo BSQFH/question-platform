@@ -1,22 +1,27 @@
+import "./globals.css"
+import AppHeader from "./components/AppHeader"
+
 export const metadata = {
-  title: "在线题库"
+  title: {
+    default: "锡铁刷题",
+    template: "%s | 锡铁刷题"
+  },
+  description: "轨道交通岗位知识在线练习平台"
 }
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#0f766e"
+}
 
-export default function RootLayout({children}){
-
+export default function RootLayout({ children }) {
   return (
-
-    <html lang="zh">
-
+    <html lang="zh-CN">
       <body>
-
-        {children}
-
+        <AppHeader />
+        <div className="app-content">{children}</div>
       </body>
-
     </html>
-
   )
-
 }
